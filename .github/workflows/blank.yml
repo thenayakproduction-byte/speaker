@@ -24,11 +24,24 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      
       - name: Configure Android SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          yes | sdkmanager --licenses || true
-          sdkmanager --install "platforms;android-34" "build-tools;34.0.0"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+
+          if [ ! -x "$SDKMANAGER" ]; then
+            echo "sdkmanager not found!"
+            find "$ANDROID_HOME/cmdline-tools" -name sdkmanager
+            exit 1
+          fi
+
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+          yes | "$SDKMANAGER" --licenses || true
+
+          "$SDKMANAGER" --install \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
 
       - name: Install Android SDK packages
         run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
